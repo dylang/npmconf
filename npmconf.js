@@ -10,7 +10,6 @@ var nopt = require('nopt')
 var ini = require('ini')
 var Octal = configDefs.Octal
 var mkdirp = require('mkdirp')
-var path = require('path')
 
 exports.load = load
 exports.Conf = Conf
@@ -159,7 +158,7 @@ function load_(builtin, rc, cli, cb) {
     finalize()
   }
 
-  function finalize(er, cadata) {
+  function finalize(er) {
     if (er) {
       return cb(er)
     }
@@ -213,7 +212,7 @@ Conf.prototype.save = function (where, cb) {
   var target = this.sources[where]
   if (!target || !(target.path || target.source) || !target.data) {
     if (where !== 'builtin')
-      var er = new Error('bad save target: '+where)
+      var er = new Error('bad save target: ' + where)
     if (cb) {
       process.nextTick(cb.bind(null, er))
       return this
@@ -251,7 +250,7 @@ Conf.prototype.save = function (where, cb) {
   done = done.bind(this)
   this._saving ++
 
-  var mode = where === 'user' ? 0600 : 0666
+  var mode = where === 'user' ? "0600" : "0666"
   if (!data.trim())
     fs.unlink(target.path, done)
   else {
@@ -339,7 +338,7 @@ Conf.prototype.addEnv = function (env) {
   return CC.prototype.addEnv.call(this, '', conf, 'env')
 }
 
-function parseField (f, k, emptyIsFalse) {
+function parseField (f, k) {
   if (typeof f !== 'string' && !(f instanceof String))
     return f
 
@@ -351,7 +350,7 @@ function parseField (f, k, emptyIsFalse) {
   var isOctal = -1 !== typeList.indexOf(Octal)
   var isNumber = isOctal || (-1 !== typeList.indexOf(Number))
 
-  f = (''+f).trim()
+  f = ('' + f).trim()
 
   if (f.match(/^".*"$/))
     f = JSON.parse(f)
@@ -387,19 +386,19 @@ function envReplace (f) {
 
   // replace any ${ENV} values with the appropriate environ.
   var envExpr = /(\\*)\$\{([^}]+)\}/g
-  return f.replace(envExpr, function (orig, esc, name, i, s) {
+  return f.replace(envExpr, function (orig, esc, name) {
     esc = esc.length && esc.length % 2
     if (esc)
       return orig
     if (undefined === process.env[name])
-      throw new Error('Failed to replace env in config: '+orig)
+      throw new Error('Failed to replace env in config: ' + orig)
     return process.env[name]
   })
 }
 
 function validate (cl) {
   // warn about invalid configs at every level.
-  cl.list.forEach(function (conf, level) {
+  cl.list.forEach(function (conf) {
     nopt.clean(conf, configDefs.types)
   })
 }
